@@ -44,7 +44,11 @@ except ValueError as e:
 Visible = dict[Provider, list[int] | None]
 
 
-def _is_int(value: Any, _prefix: str) -> int:
+def _is_int(value: Any, _prefix: str) -> bool:
+    if isinstance(value, str):
+        if not value.strip():
+            return False
+
     try:
         value = int(value)
         return True
