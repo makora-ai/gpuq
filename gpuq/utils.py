@@ -91,7 +91,7 @@ def int_or_none(value: str) -> int | None:
 
 
 def int_list(value: str) -> list[int]:
-    return [int(el) for el in value.split(",")]
+    return [int(el) for el in value.split(",") if el.strip()]
 
 
 class default:
