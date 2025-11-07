@@ -16,23 +16,23 @@ def env_overwrite(**kwargs: str) -> Generator[None, None, None]:
         os.environ.update(env)
 
 
-def test_empty_env():
+def test_empty_env() -> None:
     with env_overwrite(CUDA_VISIBLE_DEVICES=""):
         assert not G.query(G.Provider.CUDA, visible_only=True)
 
 
-def test_empty_env_hip():
+def test_empty_env_hip() -> None:
     with env_overwrite(HIP_VISIBLE_DEVICES=""):
         assert not G.query(G.Provider.HIP, visible_only=True)
 
 
-def test_empty_env_mock():
+def test_empty_env_mock() -> None:
     with env_overwrite(CUDA_VISIBLE_DEVICES=""):
         with G.mock(cuda_count=1, hip_count=0):
             assert not G.query(visible_only=True)
 
 
-def test_empty_env_hip_mock():
+def test_empty_env_hip_mock() -> None:
     with env_overwrite(HIP_VISIBLE_DEVICES=""):
         with G.mock(cuda_count=0, hip_count=1):
             assert not G.query(visible_only=True)
