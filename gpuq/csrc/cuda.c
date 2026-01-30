@@ -272,6 +272,10 @@ static int try_load_cudaruntime() {
             record_dl_error(&dl_error_buffer, &dl_error_len, FALSE);
             cuda_runtime_dl = dlopen("libcudart.so.12", RTLD_NOW|RTLD_LOCAL);
         }
+        if (!cuda_runtime_dl) {
+            record_dl_error(&dl_error_buffer, &dl_error_len, FALSE);
+            cuda_runtime_dl = dlopen("libcudart.so.13", RTLD_NOW|RTLD_LOCAL);
+        }
 
         if (!cuda_runtime_dl) {
             record_dl_error(&dl_error_buffer, &dl_error_len, TRUE);
@@ -282,7 +286,15 @@ static int try_load_cudaruntime() {
                 if (cuda_runtime_dl)
                     break;
                 record_dl_error(&dl_error_buffer, &dl_error_len, TRUE);
+
                 strcpy(_hints[i] + _hints_len[i], "libcudart.so.12");
+                cuda_runtime_dl = dlopen(_hints[i], RTLD_NOW|RTLD_LOCAL);
+                _hints[i][_hints_len[i]] = 0;
+                if (cuda_runtime_dl)
+                    break;
+                record_dl_error(&dl_error_buffer, &dl_error_len, TRUE);
+
+                strcpy(_hints[i] + _hints_len[i], "libcudart.so.13");
                 cuda_runtime_dl = dlopen(_hints[i], RTLD_NOW|RTLD_LOCAL);
                 _hints[i][_hints_len[i]] = 0;
                 if (cuda_runtime_dl)

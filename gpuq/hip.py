@@ -5,7 +5,6 @@ from pathlib import Path
 from functools import cache
 from dataclasses import dataclass
 
-
 _amd_nodes_tree = "/sys/class/kfd/kfd/topology/nodes/"
 _amd_node_info_file = "properties"
 _amd_node_gfx_ver = re.compile(r"gfx_target_version ([0-9a-f]+)")
