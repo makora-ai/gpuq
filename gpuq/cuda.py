@@ -7,7 +7,6 @@ from functools import cache
 from dataclasses import dataclass
 from typing import Any
 
-
 _cuda_gpu_info = re.compile(
     r"(?:(?:[0-9]+)%|N/A).*?([0-9]+)MiB +/ +([0-9]+)MiB.*?([0-9]+)%"
 )

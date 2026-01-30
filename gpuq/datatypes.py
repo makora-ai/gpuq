@@ -5,7 +5,6 @@ from enum import IntFlag, auto
 from .cuda import CudaRuntimeInfo
 from .hip import HipRuntimeInfo
 
-
 if TYPE_CHECKING:
     from .impl import Implementation
 

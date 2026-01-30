@@ -17,7 +17,11 @@ def _restore_default_hints() -> None:
     if site.ENABLE_USER_SITE:
         sites.append(site.getusersitepackages())
 
-    loc_hints = ["/opt/cuda/targets/x86_64-linux/lib/", "/opt/rocm/lib/"] + list(
+    loc_hints = [
+        "/opt/cuda/targets/x86_64-linux/lib/",
+        "/opt/rocm/lib/",
+        "/usr/local/cuda/targets/x86_64-linux/lib/",
+    ] + list(
         itertools.chain.from_iterable(
             [
                 os.path.join(loc, "nvidia/cuda_runtime/lib/"),

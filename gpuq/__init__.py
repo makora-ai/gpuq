@@ -7,7 +7,6 @@ from .datatypes import Provider, Properties
 from .impl import Implementation, GenuineImplementation, MockImplementation
 from .utils import add_module_properties, staticproperty, default, int_or_none, int_list
 
-
 _current_implementation = local()
 _default_impl = None
 
