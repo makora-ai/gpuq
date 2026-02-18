@@ -19,10 +19,14 @@ jobs:
     strategy:
       max-parallel: 5
       matrix:
-        python_version: ["3.10", "3.11", "3.12", "3.13"]
-        os: [ubuntu-24.04, ubuntu-22.04, macos-latest]
+        python_version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+        configs: [
+          { os: ubuntu-24.04, cibw: true, cibw_archs: "x86_64,aarch64,i686" },
+          { os: ubuntu-22.04, cibw: false, cibw_archs: "" },
+          { os: macos-latest, cibw: true, cibw_archs: "arm64,x86_64" }
+        ]
 
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.configs.os }}
 
     steps:
       - name: Check out repository code
@@ -61,20 +65,20 @@ jobs:
           report_paths: '**/junit/*.xml'
 
       - name: Install cibuildwheel
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && matrix.os != 'ubuntu-22.04' && matrix.python_version == '3.13' }}
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && matrix.configs.cibw && matrix.python_version == '3.13' }}
         run: |
           source .venv/bin/activate
           pip install cibuildwheel
 
       - name: Build wheels
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && matrix.os != 'ubuntu-22.04' && matrix.python_version == '3.13' }}
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && matrix.configs.cibw && matrix.python_version == '3.13' }}
         run: |
           source .venv/bin/activate
-          python -m cibuildwheel --output-dir wheelhouse
+          python -m cibuildwheel --output-dir wheelhouse --arch "${{ matrix.configs.cibw_archs }}"
 
       - name: Upload wheels
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && matrix.os != 'ubuntu-22.04' && matrix.python_version == '3.13' }}
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && matrix.configs.cibw && matrix.python_version == '3.13' }}
         uses: actions/upload-artifact@v4
         with:
-          name: cibw-wheels-${{ matrix.os }}-python-${{ matrix.python_version }}-${{ strategy.job-index }}
+          name: cibw-wheels-${{ matrix.configs.os }}-python-${{ matrix.python_version }}-${{ strategy.job-index }}
           path: ./wheelhouse/*.whl
