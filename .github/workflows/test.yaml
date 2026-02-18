@@ -74,7 +74,7 @@ jobs:
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && matrix.configs.cibw && matrix.python_version == '3.13' }}
         run: |
           source .venv/bin/activate
-          python -m cibuildwheel --output-dir wheelhouse --arch "${{ matrix.configs.cibw_archs }}"
+          python -m cibuildwheel --output-dir wheelhouse --archs "${{ matrix.configs.cibw_archs }}"
 
       - name: Upload wheels
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && matrix.configs.cibw && matrix.python_version == '3.13' }}
