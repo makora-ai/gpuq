@@ -14,19 +14,16 @@ on:
       - main
 
 jobs:
-  build-and-test:
-    timeout-minutes: 20
+  tests:
+    name: Mypy and tests
+    timeout-minutes: 5
     strategy:
       max-parallel: 5
       matrix:
         python_version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
-        configs: [
-          { os: ubuntu-24.04, cibw: true, cibw_archs: "x86_64,aarch64,i686" },
-          { os: ubuntu-22.04, cibw: false, cibw_archs: "" },
-          { os: macos-latest, cibw: true, cibw_archs: "arm64,x86_64" }
-        ]
+        os: [ubuntu-22.04, ubuntu-24.04, macos-latest]
 
-    runs-on: ${{ matrix.configs.os }}
+    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Check out repository code
@@ -63,22 +60,49 @@ jobs:
         if: success() || failure() # always run even if the previous step fails
         with:
           report_paths: '**/junit/*.xml'
+  
 
-      - name: Install cibuildwheel
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && matrix.configs.cibw && matrix.python_version == '3.13' }}
-        run: |
-          source .venv/bin/activate
-          pip install cibuildwheel
+  final_status_check:
+    name: Final result
+    if: ${{ always() }}
+    needs: [tests]
+    runs-on: ubuntu-latest
+    steps:
+      - run: exit 1
+        # see https://stackoverflow.com/a/67532120/4907315
+        if: >-
+          ${{
+               contains(needs.*.result, 'failure')
+            || contains(needs.*.result, 'cancelled')
+            || contains(needs.*.result, 'skipped')
+          }}
+
+
+  build-wheels:
+    name: Build wheels
+    needs: [tests]
+    if: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref_type == 'tag') }}
+    timeout-minutes: 5
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      max-parallel: 4
+      matrix:
+        os: [ubuntu-latest, ubuntu-24.04-arm, macos-latest, macos-15-intel]
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up QEMU
+        if: runner.os == 'Linux' && runner.arch == 'X64'
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: all
 
       - name: Build wheels
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && matrix.configs.cibw && matrix.python_version == '3.13' }}
-        run: |
-          source .venv/bin/activate
-          python -m cibuildwheel --output-dir wheelhouse --archs "${{ matrix.configs.cibw_archs }}"
+        uses: pypa/cibuildwheel@v3.3.1
 
-      - name: Upload wheels
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && matrix.configs.cibw && matrix.python_version == '3.13' }}
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
-          name: cibw-wheels-${{ matrix.configs.os }}-python-${{ matrix.python_version }}-${{ strategy.job-index }}
+          name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
           path: ./wheelhouse/*.whl
