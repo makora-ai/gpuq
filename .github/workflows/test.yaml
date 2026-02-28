@@ -20,8 +20,8 @@ jobs:
     strategy:
       max-parallel: 5
       matrix:
-        python_version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
-        os: [ubuntu-22.04, ubuntu-24.04, macos-latest]
+        python_version: ["3.12"]
+        os: [ubuntu-24.04]
 
     runs-on: ${{ matrix.os }}
 
@@ -88,16 +88,16 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        os: [ubuntu-latest, ubuntu-24.04-arm, macos-latest, macos-15-intel]
+        os: [ubuntu-latest]
 
     steps:
       - uses: actions/checkout@v5
 
-      - name: Set up QEMU
-        if: runner.os == 'Linux' && runner.arch == 'X64'
-        uses: docker/setup-qemu-action@v3
-        with:
-          platforms: all
+      # - name: Set up QEMU
+      #   if: runner.os == 'Linux' && runner.arch == 'X64'
+      #   uses: docker/setup-qemu-action@v3
+      #   with:
+      #     platforms: all
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.3.1

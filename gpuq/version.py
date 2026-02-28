@@ -24,7 +24,7 @@ try:
         if r.is_dirty():
             status.append("dirty")
         if r.untracked_files:
-            status.append(f"+{len(r.untracked_files)} untracked")
+            status.append(f"+{r.untracked_files} untracked")
         if status:
             commit += f' ({",".join(status)})'
     except git.InvalidGitRepositoryError:
