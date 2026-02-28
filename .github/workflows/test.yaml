@@ -9,8 +9,6 @@ on:
     branches:
       - main
       - develop
-    tags:
-      - "*"
   pull_request:
     branches:
       - main
@@ -22,8 +20,8 @@ jobs:
     strategy:
       max-parallel: 5
       matrix:
-        python_version: ["3.12"]
-        os: [ubuntu-24.04]
+        python_version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+        os: [ubuntu-22.04, ubuntu-24.04, macos-latest]
 
     runs-on: ${{ matrix.os }}
 
@@ -90,7 +88,7 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-latest, ubuntu-24.04-arm, macos-latest, macos-15-intel]
 
     steps:
       - uses: actions/checkout@v5

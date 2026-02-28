@@ -1,6 +1,6 @@
 from typing import Any
 
-version: str = "1.5.5"
+version: str = "1.5.6"
 repo: str = "unknown"
 commit: str = "unknown"
 has_repo: bool = False
@@ -24,7 +24,7 @@ try:
         if r.is_dirty():
             status.append("dirty")
         if r.untracked_files:
-            status.append(f"+{r.untracked_files} untracked")
+            status.append(f"+{len(r.untracked_files)} untracked")
         if status:
             commit += f' ({",".join(status)})'
     except git.InvalidGitRepositoryError:
