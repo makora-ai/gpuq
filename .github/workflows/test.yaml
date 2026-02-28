@@ -9,7 +9,8 @@ on:
     branches:
       - main
       - develop
-      - lukasz/*
+    tags:
+      - "*"
   pull_request:
     branches:
       - main
