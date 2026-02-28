@@ -9,6 +9,7 @@ on:
     branches:
       - main
       - develop
+      - lukasz/*
   pull_request:
     branches:
       - main
