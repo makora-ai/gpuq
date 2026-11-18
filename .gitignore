@@ -162,3 +162,5 @@ cython_debug/
 
 # SBOMs (scripts/sbom.sh)
 sbom/
+.idea/
+
