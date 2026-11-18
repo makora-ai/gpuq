@@ -78,6 +78,79 @@ jobs:
           }}
 
 
+  sbom_sources:
+    name: SBOM
+    timeout-minutes: 10
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Setup python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install syft
+        uses: anchore/sbom-action/download-syft@v0.24.3
+        with:
+          syft-version: v1.55.0
+
+      - name: Generate SBOMs
+        env:
+          SOURCE_VERSION: ${{ github.sha }}
+        run: bash scripts/sbom.sh sbom >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload SBOMs
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-sources-${{ github.sha }}
+          path: sbom/
+          retention-days: 90
+
+
+  dependency_track_upload:
+    name: Upload SBOMs to Dependency-Track
+    if: >-
+      !cancelled() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+      && vars.DEPENDENCYTRACK_URL != ''
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    needs: [sbom_sources]
+    steps:
+      - uses: actions/download-artifact@v4
+        continue-on-error: true
+        with: { name: 'sbom-sources-${{ github.sha }}', path: sbom/ }
+
+      - name: Connect to Tailscale
+        uses: tailscale/github-action@v4.4.0
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:gh-actions-ci
+
+      - name: Upload SBOMs to Dependency-Track
+        env:
+          DT_URL: ${{ vars.DEPENDENCYTRACK_URL }}
+          DT_API_KEY: ${{ secrets.DEPENDENCYTRACK_API_KEY }}
+        run: |
+          # <dtrack project>:<file in sbom/ without .cdx.json>, one per project.
+          failed=0
+          for pair in gpuq:gpuq; do
+            project="${pair%%:*}" file="sbom/${pair#*:}.cdx.json"
+            if [ ! -f "$file" ]; then
+              echo "::warning::$file missing, $project not uploaded"; failed=1; continue
+            fi
+            curl -fsS --retry 3 --retry-all-errors -X POST "${DT_URL%/}/api/v1/bom" \
+              -H "X-Api-Key: $DT_API_KEY" -F autoCreate=true \
+              -F "projectName=$project" -F projectVersion=main \
+              -F "bom=@$file" || failed=1
+            echo
+          done
+          exit $failed
+
+
   build-wheels:
     name: Build wheels
     needs: [tests]
