@@ -73,6 +73,7 @@ setup(name=package_name,
     download_url=download_url,
     long_description=long_desc or "",
     long_description_content_type=long_desc_type or "",
+    license='MIT',
     python_requires='>=3.10.0',
     extras_require={
         "dev": [
