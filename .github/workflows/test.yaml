@@ -111,9 +111,10 @@ jobs:
 
   dependency_track_upload:
     name: Upload SBOMs to Dependency-Track
+    environment: dtrack
     if: >-
       !cancelled() && github.event_name == 'push' && github.ref == 'refs/heads/main'
-      && vars.DEPENDENCYTRACK_URL != ''
+      && secrets.DEPENDENCYTRACK_URL != ''
     timeout-minutes: 10
     runs-on: ubuntu-latest
     continue-on-error: true
@@ -132,7 +133,7 @@ jobs:
 
       - name: Upload SBOMs to Dependency-Track
         env:
-          DT_URL: ${{ vars.DEPENDENCYTRACK_URL }}
+          DT_URL: ${{ secrets.DEPENDENCYTRACK_URL }}
           DT_API_KEY: ${{ secrets.DEPENDENCYTRACK_API_KEY }}
         run: |
           # <dtrack project>:<file in sbom/ without .cdx.json>, one per project.
