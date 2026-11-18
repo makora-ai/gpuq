@@ -114,7 +114,6 @@ jobs:
     environment: dtrack
     if: >-
       !cancelled() && github.event_name == 'push' && github.ref == 'refs/heads/main'
-      && secrets.DEPENDENCYTRACK_URL != ''
     timeout-minutes: 10
     runs-on: ubuntu-latest
     continue-on-error: true
