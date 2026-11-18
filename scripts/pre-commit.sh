@@ -10,7 +10,7 @@ fi
 if [ "$1" == "-f" ]; then
   black gpuq tests
 else
-  black --check gpuq test
+  black --check gpuq tests
 fi;
 
 mypy --strict gpuq tests
